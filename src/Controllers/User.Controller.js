@@ -198,14 +198,19 @@ const updateUserRole = asyncHandler(async (req, res) => {
 });
 
 const searchUsers = asyncHandler(async (req, res) => {
-    const { email } = req.query;
-    if (!email || email.trim() === "") {
-        throw new ApiError(400, "Email query parameter is required");
+    const query = req.query.query || req.query.email || req.query.q;
+    if (!query || query.trim() === "") {
+        return res.status(200).json(new ApiResponse(200, [], "Empty search query"));
     }
     
-    const users = await User.find({ email: { $regex: email, $options: "i" } })
-        .select("_id fullName email profilePicTag")
-        .limit(10);
+    const users = await User.find({
+        $or: [
+            { email: { $regex: query.trim(), $options: "i" } },
+            { fullName: { $regex: query.trim(), $options: "i" } }
+        ]
+    })
+    .select("_id fullName email profilePicTag")
+    .limit(10);
 
     return res.status(200).json(new ApiResponse(200, users, "Users found successfully"));
 });

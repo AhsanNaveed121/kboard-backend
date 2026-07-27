@@ -26,7 +26,7 @@ const userSchema = new Schema(
       type: Date,
     },
     profilePicTag: {
-      type: String, // e.g. a storage key/URL or an identicon seed
+      type: String, 
       default: null,
     },
     role: {
@@ -43,7 +43,7 @@ const userSchema = new Schema(
       select: false,
     },
   },
-  { timestamps: true } // adds createdAt / updatedAt
+  { timestamps: true } 
 );
 
 

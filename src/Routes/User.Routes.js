@@ -1,45 +1,32 @@
 import { Router } from "express";
 import {
-    RegisterUser,
-    LoginUser,
-    getCurrentUser,
-    updateAccountDetails,
-    changeCurrentPassword,
-    getAllUsers,
-    updateUserRole,
-    searchUsers,
-    deleteUser
+  RegisterUser,
+  LoginUser,
+  getCurrentUser,
+  updateAccountDetails,
+  changeCurrentPassword,
+  getAllUsers,
+  updateUserRole,
+  searchUsers,
+  deleteUser,
 } from "../Controllers/User.Controller.js";
-import { upload } from "../Middlewares/Multer.Middleware.js";
 import { verifyJWT, verifyAdmin } from "../Middlewares/Auth.Middleware.js";
 
 const router = Router();
 
-router.route("/register").post(
-    upload.fields([
-        {
-            name: "profilePicTag",
-            maxCount: 1
-        }
-    ]),
-    RegisterUser
-);
+router.route("/register").post(RegisterUser);
+router.route("/login").post(LoginUser);
 
-router.route("/login").post(
-    upload.none(), // parses multipart/form-data bodies with no file fields
-    LoginUser
-);
-
-router.route("/search").get(verifyJWT, searchUsers);
-
-// Protected routes (require JWT token)
+// Protected routes
 router.route("/current-user").get(verifyJWT, getCurrentUser);
 router.route("/update-account").patch(verifyJWT, updateAccountDetails);
-router.route("/change-password").post(verifyJWT, changeCurrentPassword);
-
-// Admin routes
+router.route("/change-password").patch(verifyJWT, changeCurrentPassword);
+router.route("/search").get(verifyJWT, searchUsers);
+router.route("/").get(verifyJWT, verifyAdmin, getAllUsers);
 router.route("/admin/users").get(verifyJWT, verifyAdmin, getAllUsers);
+router.route("/:userId/role").patch(verifyJWT, verifyAdmin, updateUserRole);
 router.route("/admin/:userId/role").patch(verifyJWT, verifyAdmin, updateUserRole);
+router.route("/:userId").delete(verifyJWT, verifyAdmin, deleteUser);
 router.route("/admin/:userId").delete(verifyJWT, verifyAdmin, deleteUser);
 
 export default router;

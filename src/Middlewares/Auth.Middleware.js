@@ -35,11 +35,15 @@ export const verifyAdmin = asyncHandler(async (req, res, next) => {
   next();
 });
 
+import mongoose from "mongoose";
+
 export const verifyBoardOwner = asyncHandler(async (req, res, next) => {
   const boardId = req.params.boardId || req.params.id || req.body.boardId;
   if (!boardId) throw new ApiError(400, "Board ID is missing");
+  if (!mongoose.Types.ObjectId.isValid(boardId)) {
+    throw new ApiError(400, `Invalid Board ID format: ${boardId}`);
+  }
 
-  // Avoid circular dependency if possible, import Board locally or at the top
   const { Board } = await import("../Models/Board.model.js");
   const board = await Board.findById(boardId);
   if (!board) throw new ApiError(404, "Board not found");
@@ -59,6 +63,9 @@ export const verifyBoardOwner = asyncHandler(async (req, res, next) => {
 export const verifyBoardAccess = asyncHandler(async (req, res, next) => {
   const boardId = req.params.boardId || req.params.id || req.body.boardId;
   if (!boardId) throw new ApiError(400, "Board ID is missing");
+  if (!mongoose.Types.ObjectId.isValid(boardId)) {
+    throw new ApiError(400, `Invalid Board ID format: ${boardId}`);
+  }
 
   const { Board } = await import("../Models/Board.model.js");
   const board = await Board.findById(boardId);

@@ -62,7 +62,9 @@ export const createTask = asyncHandler(async (req, res) => {
         assignedTo: assignedTo || null
     });
 
-    return res.status(201).json(new ApiResponse(201, task, "Task created successfully"));
+    const populatedTask = await Task.findById(task._id).populate("assignedTo", "fullName email profilePicTag");
+
+    return res.status(201).json(new ApiResponse(201, populatedTask, "Task created successfully"));
 });
 
 export const getTasksByBoard = asyncHandler(async (req, res) => {
@@ -95,16 +97,16 @@ export const updateTask = asyncHandler(async (req, res) => {
 
     if (!canFullEdit) {
         if (!isAssignee) {
-            throw new ApiError(403, "You can only update tasks assigned to you");
+            throw new ApiError(403, "You can only move tasks assigned to you");
         }
         
-        // If they are assignee, they can ONLY modify 'column' and 'position'
+        // Non-owners can ONLY modify 'column' and 'position'
         const allowedKeys = ["column", "position"];
         const updateKeys = Object.keys(updates);
         const invalidKeys = updateKeys.filter(key => !allowedKeys.includes(key));
         
         if (invalidKeys.length > 0) {
-            throw new ApiError(403, "You can only change the column and position of your assigned tasks");
+            throw new ApiError(403, "Only the board owner can edit task details or assignment");
         }
     }
 

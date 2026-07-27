@@ -1,30 +1,34 @@
 import { Router } from "express";
 import {
-    CreateBoard,
-    GetBoard,
-    GetBoardById,
-    UpdateBoard,
-    DeleteBoard,
-    addBoardMember,
-    removeBoardMember
+  CreateBoard,
+  GetBoard,
+  GetBoardById,
+  UpdateBoard,
+  DeleteBoard,
+  addBoardMember,
+  removeBoardMember,
 } from "../Controllers/Board.Controller.js";
 import { verifyJWT, verifyBoardAccess, verifyBoardOwner } from "../Middlewares/Auth.Middleware.js";
 
 const router = Router();
 
-router.route("/").post(verifyJWT, CreateBoard).get(verifyJWT, GetBoard);
-router.route("/create-board").post(verifyJWT, CreateBoard);
-router.route("/get-boards").get(verifyJWT, GetBoard);
+router.use(verifyJWT);
 
+// Specific named routes first (to avoid matching /:id parameter)
+router.route("/create-board").post(CreateBoard);
+router.route("/get-boards").get(GetBoard);
+router.route("/admin/all").get(GetBoard);
+
+// Root routes
+router.route("/").post(CreateBoard).get(GetBoard);
+
+// Parameterized ID routes (must be placed AFTER specific route paths)
 router.route("/:id")
-    .get(verifyJWT, verifyBoardAccess, GetBoardById)
-    .patch(verifyJWT, verifyBoardOwner, UpdateBoard)
-    .delete(verifyJWT, verifyBoardOwner, DeleteBoard);
+  .get(verifyBoardAccess, GetBoardById)
+  .patch(verifyBoardOwner, UpdateBoard)
+  .delete(verifyBoardOwner, DeleteBoard);
 
-router.route("/:id/members")
-    .post(verifyJWT, verifyBoardOwner, addBoardMember);
-
-router.route("/:id/members/:userId")
-    .delete(verifyJWT, verifyBoardOwner, removeBoardMember);
+router.route("/:id/members").post(verifyBoardOwner, addBoardMember);
+router.route("/:id/members/:userId").delete(verifyBoardOwner, removeBoardMember);
 
 export default router;

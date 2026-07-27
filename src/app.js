@@ -1,23 +1,12 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-import helmet from "helmet" // Security middleware that sets protective HTTP response headers
-import rateLimit from "express-rate-limit" // Middleware to limit repeated requests to public APIs and prevent brute-force attacks
+import helmet from "helmet"
 
 const app = express()
 
-// Sets secure HTTP headers to guard against common web vulnerabilities (XSS, clickjacking, etc.)
+// Security middleware that sets protective HTTP response headers
 app.use(helmet())
-
-// Rate limiter: limits each IP address to 100 requests per 15-minute window across all /api routes
-const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Maximum 100 requests per window
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { message: "Too many requests from this IP, please try again after 15 minutes." }
-})
-app.use("/api", apiLimiter)
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
@@ -34,11 +23,13 @@ app.use(cookieParser())
 import userRouter from './Routes/User.Routes.js'
 import boardRouter from './Routes/Board.Routes.js'
 import columnRouter from './Routes/Column.Routes.js'
+import taskRouter from './Routes/Task.Routes.js'
 
 //routes declaration
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/boards", boardRouter)
 app.use("/api/v1/columns", columnRouter)
+app.use("/api/v1/tasks", taskRouter)
 
 
 //means that on this router ("/api/v1/users") ,activate userRouter

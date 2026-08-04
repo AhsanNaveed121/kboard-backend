@@ -14,9 +14,11 @@ import { verifyJWT, verifyAdmin } from "../Middlewares/Auth.Middleware.js";
 import { loginRateLimiter } from "../Middlewares/RateLimiter.Middleware.js";
 import { validateRegisterInput, validateLoginInput } from "../Middlewares/Validation.Middleware.js";
 
+import { upload } from "../Middlewares/Multer.Middleware.js";
+
 const router = Router();
 
-router.route("/register").post(validateRegisterInput, RegisterUser);
+router.route("/register").post(upload.fields([{ name: "profilePicTag", maxCount: 1 }]), validateRegisterInput, RegisterUser);
 router.route("/login").post(loginRateLimiter, validateLoginInput, LoginUser);
 
 // Protected routes

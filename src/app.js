@@ -11,6 +11,12 @@ const app = express()
 // Security middleware that sets protective HTTP response headers
 app.use(helmet())
 
+// CORS — must be applied before routes
+app.use(cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true
+}))
+
 app.use(express.json({limit: "16kb"}))
 app.use(express.urlencoded({extended: true, limit: "16kb"}))
 
@@ -26,6 +32,14 @@ app.use((req, res, next) => {
 app.use(express.static("public"))
 app.use(cookieParser())
 app.use(passport.initialize()) // activates the Google auth stratergy 
+
+// Root route
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Kboard Backend API is running!",
+    docs: "/api/v1/health",
+  });
+});
 
 // Health check endpoint for host uptime and deployment monitoring
 app.get("/api/v1/health", (req, res) => {

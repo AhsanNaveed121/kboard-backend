@@ -21,6 +21,14 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 
+// Health check route
+app.get("/", (req, res) => {
+    res.status(200).json({
+        status: "OK",
+        message: "Kboard Backend API is running successfully!"
+    });
+});
+
 //routes import
 import userRouter from './src/Routes/User.Routes.js'
 import boardRouter from './src/Routes/Board.Routes.js'

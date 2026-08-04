@@ -10,17 +10,12 @@ const DBconnect = async () => {
         let connectionUrl = process.env.MONGODB_URI || process.env.DBURL;
         
         if (!connectionUrl) {
-            throw new Error("Neither MONGODB_URI nor DBURL is defined in your environment variables (.env file)");
-        }
-        
-        if (connectionUrl.includes("?")) {
-            const [base, query] = connectionUrl.split("?");
-            connectionUrl = `${base.replace(/\/$/, "")}/${DB_NAME}?${query}`;
-        } else {
-            connectionUrl = `${connectionUrl.replace(/\/$/, "")}/${DB_NAME}`;
+            throw new Error("Neither MONGODB_URI nor DBURL is defined in environment variables");
         }
 
-        await mongoose.connect(connectionUrl);
+        await mongoose.connect(connectionUrl, {
+            dbName: DB_NAME
+        });
         console.log("DB connected successfully");
     }
     catch (error) {

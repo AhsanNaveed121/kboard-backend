@@ -1,19 +1,27 @@
 import dotenv from "dotenv"
-import connectDB from "../src/DB/index.js"
-import { app } from "../app.js"
-
 dotenv.config()
 
-export default async function handler(req, res) {
-    try {
-        await connectDB();
-        return app(req, res);
-    } catch (error) {
-        console.error("Vercel Serverless Handler Error:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Serverless Database Connection Error",
-            error: error.message || String(error)
-        });
+import connectDB from "../src/DB/index.js"
+import { app } from "../src/app.js"
+
+// Ensure DB is connected for each serverless invocation
+let isConnected = false;
+
+const handler = async (req, res) => {
+    if (!isConnected) {
+        try {
+            await connectDB();
+            isConnected = true;
+        } catch (error) {
+            console.error("Database connection error:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Failed to connect to database",
+                error: error.message || String(error)
+            });
+        }
     }
-}
+    return app(req, res);
+};
+
+export default handler;

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DB_NAME } from "../Constants.js";
+import { DB_NAME } from "../constants.js";
 
 const DBconnect = async () => {
     if (mongoose.connection.readyState >= 1) {

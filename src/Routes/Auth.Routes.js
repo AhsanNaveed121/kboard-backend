@@ -12,10 +12,15 @@ const router = Router();
  */
 router.get(
   "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-    session: false, // we use JWTs, not sessions
-  })
+  (req, res, next) => {
+    const { frontend_url } = req.query;
+    const state = frontend_url ? Buffer.from(frontend_url).toString("base64") : "";
+    passport.authenticate("google", {
+      scope: ["profile", "email"],
+      session: false,
+      state: state
+    })(req, res, next);
+  }
 );
 
 /*
@@ -34,10 +39,31 @@ router.get(
  */
 router.get(
   "/google/callback",
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5173"}/login?error=oauth_failed`,
-  }),
+  (req, res, next) => {
+    const state = req.query.state;
+    let frontendURL = "";
+    
+    if (state && state !== "undefined") {
+      try {
+        frontendURL = Buffer.from(state, "base64").toString("utf-8");
+      } catch (err) {
+        frontendURL = "";
+      }
+    }
+    
+    // Validate that it's a real HTTP/HTTPS URL and not a string "undefined"
+    if (!frontendURL || frontendURL === "undefined" || !frontendURL.startsWith("http")) {
+      frontendURL = process.env.FRONTEND_URL || "";
+    }
+    if (!frontendURL || frontendURL === "undefined" || !frontendURL.startsWith("http")) {
+      frontendURL = "https://kboard-frontend-ruby.vercel.app";
+    }
+    
+    passport.authenticate("google", {
+      session: false,
+      failureRedirect: `${frontendURL.replace(/\/$/, "")}/login?error=oauth_failed`,
+    })(req, res, next);
+  },
   googleCallback
 );
 

@@ -12,13 +12,33 @@ const app = express()
 app.use(helmet())
 
 // CORS — must be applied before routes
-// When CORS_ORIGIN is "*", we use a dynamic callback so credentials still work
-// (the spec forbids origin:"*" with credentials:true)
-const corsOrigin = process.env.CORS_ORIGIN;
 app.use(cors({
-    origin: corsOrigin === "*"
-        ? (origin, cb) => cb(null, true)   // reflect any origin
-        : corsOrigin,
+    origin: (origin, cb) => {
+        // If no origin (e.g. mobile apps, postman, curl)
+        if (!origin) return cb(null, true);
+
+        // Normalize configured origin (remove trailing slash if present)
+        const configOrigin = (process.env.CORS_ORIGIN || "*").replace(/\/$/, "");
+
+        const allowedOrigins = [
+            configOrigin,
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://localhost:5000",
+            "http://localhost:8000"
+        ];
+
+        // Allow match, wildcard, or any Vercel deployment URL
+        const isAllowed = allowedOrigins.includes(origin) || 
+                          origin.endsWith(".vercel.app") || 
+                          configOrigin === "*";
+
+        if (isAllowed) {
+            cb(null, true);
+        } else {
+            cb(new Error("Blocked by CORS"));
+        }
+    },
     credentials: true
 }))
 

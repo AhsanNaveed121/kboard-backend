@@ -2,8 +2,11 @@ import mongoose from "mongoose";
 import { DB_NAME } from "../Constants.js";
 
 const DBconnect = async () => {
+    if (mongoose.connection.readyState >= 1) {
+        return;
+    }
     try {
-        console.log(DB_NAME,process.env.MONGODB_URI)
+        console.log(DB_NAME, process.env.MONGODB_URI)
         let connectionUrl = process.env.MONGODB_URI || process.env.DBURL;
         
         if (!connectionUrl) {

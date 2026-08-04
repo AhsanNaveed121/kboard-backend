@@ -12,8 +12,13 @@ const app = express()
 app.use(helmet())
 
 // CORS — must be applied before routes
+// When CORS_ORIGIN is "*", we use a dynamic callback so credentials still work
+// (the spec forbids origin:"*" with credentials:true)
+const corsOrigin = process.env.CORS_ORIGIN;
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: corsOrigin === "*"
+        ? (origin, cb) => cb(null, true)   // reflect any origin
+        : corsOrigin,
     credentials: true
 }))
 

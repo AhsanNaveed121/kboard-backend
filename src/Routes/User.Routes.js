@@ -11,11 +11,13 @@ import {
   deleteUser,
 } from "../Controllers/User.Controller.js";
 import { verifyJWT, verifyAdmin } from "../Middlewares/Auth.Middleware.js";
+import { loginRateLimiter } from "../Middlewares/RateLimiter.Middleware.js";
+import { validateRegisterInput, validateLoginInput } from "../Middlewares/Validation.Middleware.js";
 
 const router = Router();
 
-router.route("/register").post(RegisterUser);
-router.route("/login").post(LoginUser);
+router.route("/register").post(validateRegisterInput, RegisterUser);
+router.route("/login").post(loginRateLimiter, validateLoginInput, LoginUser);
 
 // Protected routes
 router.route("/current-user").get(verifyJWT, getCurrentUser);

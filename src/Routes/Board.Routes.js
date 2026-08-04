@@ -7,6 +7,7 @@ import {
   DeleteBoard,
   addBoardMember,
   removeBoardMember,
+  leaveBoard,
 } from "../Controllers/Board.Controller.js";
 import { verifyJWT, verifyBoardAccess, verifyBoardOwner } from "../Middlewares/Auth.Middleware.js";
 
@@ -28,6 +29,7 @@ router.route("/:id")
   .patch(verifyBoardOwner, UpdateBoard)
   .delete(verifyBoardOwner, DeleteBoard);
 
+router.route("/:id/leave").post(verifyBoardAccess, leaveBoard);
 router.route("/:id/members").post(verifyBoardOwner, addBoardMember);
 router.route("/:id/members/:userId").delete(verifyBoardOwner, removeBoardMember);
 

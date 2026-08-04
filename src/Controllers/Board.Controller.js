@@ -132,4 +132,21 @@ const removeBoardMember = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, updatedBoard, "Member removed successfully"));
 });
 
-export { CreateBoard, GetBoard, GetBoardById, UpdateBoard, DeleteBoard, addBoardMember, removeBoardMember };
+const leaveBoard = asyncHandler(async (req, res) => {
+    const board = req.board;
+    const userId = req.user._id.toString();
+    const ownerId = board.owner?._id ? board.owner._id.toString() : board.owner?.toString();
+
+    if (ownerId === userId) {
+        throw new ApiError(400, "Board owner cannot leave the board. You must transfer ownership or delete the board.");
+    }
+
+    board.members = board.members.filter(
+        id => (id._id ? id._id.toString() : id.toString()) !== userId
+    );
+    await board.save();
+
+    return res.status(200).json(new ApiResponse(200, {}, "Successfully left the board"));
+});
+
+export { CreateBoard, GetBoard, GetBoardById, UpdateBoard, DeleteBoard, addBoardMember, removeBoardMember, leaveBoard };

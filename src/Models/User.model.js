@@ -18,12 +18,20 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: false,   // not required for OAuth users
       minlength: 8,
-      select: false, // never returned in queries by default
+      select: false,
     },
     dob: {
       type: Date,
+    },
+    provider: {
+      type: String,
+      default: null,     // null = regular email/password user
+    },
+    providerId: {
+      type: String,
+      default: null,     // Google's unique ID for this user
     },
     profilePicTag: {
       type: String, 

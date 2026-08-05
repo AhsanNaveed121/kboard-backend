@@ -125,6 +125,15 @@ const removeBoardMember = asyncHandler(async (req, res) => {
     );
     await board.save();
 
+    const { Column } = await import("../Models/Column.model.js");
+    const { Task } = await import("../Models/Task.model.js");
+    const columns = await Column.find({ board: board._id });
+    const columnIds = columns.map(c => c._id);
+    await Task.updateMany(
+        { column: { $in: columnIds }, assignedTo: userId },
+        { $set: { assignedTo: null } }
+    );
+
     const updatedBoard = await Board.findById(board._id)
         .populate("owner", "fullName email profilePicTag")
         .populate("members", "fullName email profilePicTag");
@@ -145,6 +154,15 @@ const leaveBoard = asyncHandler(async (req, res) => {
         id => (id._id ? id._id.toString() : id.toString()) !== userId
     );
     await board.save();
+
+    const { Column } = await import("../Models/Column.model.js");
+    const { Task } = await import("../Models/Task.model.js");
+    const columns = await Column.find({ board: board._id });
+    const columnIds = columns.map(c => c._id);
+    await Task.updateMany(
+        { column: { $in: columnIds }, assignedTo: userId },
+        { $set: { assignedTo: null } }
+    );
 
     return res.status(200).json(new ApiResponse(200, {}, "Successfully left the board"));
 });

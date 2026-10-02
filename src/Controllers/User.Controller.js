@@ -233,5 +233,44 @@ const deleteUser = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, {}, "User deleted successfully"));
 });
 
-export { RegisterUser, LoginUser, getCurrentUser, updateAccountDetails, changeCurrentPassword, getAllUsers, updateUserRole, searchUsers, deleteUser };
+const LogoutUser = asyncHandler(async (req, res) => {
+    if (req.user?._id) {
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $unset: {
+                    refreshToken: 1
+                }
+            },
+            {
+                new: true
+            }
+        );
+    }
+
+    const options = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none"
+    };
+
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, {}, "User logged out successfully"));
+});
+
+export { 
+    RegisterUser, 
+    LoginUser, 
+    LogoutUser, 
+    getCurrentUser, 
+    updateAccountDetails, 
+    changeCurrentPassword, 
+    getAllUsers, 
+    updateUserRole, 
+    searchUsers, 
+    deleteUser 
+};
 

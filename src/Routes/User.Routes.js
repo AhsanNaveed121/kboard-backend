@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   RegisterUser,
   LoginUser,
+  LogoutUser,
   getCurrentUser,
   updateAccountDetails,
   changeCurrentPassword,
@@ -20,6 +21,12 @@ const router = Router();
 
 router.route("/register").post(upload.fields([{ name: "profilePicTag", maxCount: 1 }]), validateRegisterInput, RegisterUser);
 router.route("/login").post(loginRateLimiter, validateLoginInput, LoginUser);
+router.route("/logout").post((req, res, next) => {
+  verifyJWT(req, res, (err) => {
+    // Proceed to LogoutUser even if token is invalid/expired so cookies are cleared
+    next();
+  });
+}, LogoutUser);
 
 // Protected routes
 router.route("/current-user").get(verifyJWT, getCurrentUser);

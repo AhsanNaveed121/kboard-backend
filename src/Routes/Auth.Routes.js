@@ -17,6 +17,7 @@ router.get(
     const state = frontend_url ? Buffer.from(frontend_url).toString("base64") : "";
     passport.authenticate("google", {
       scope: ["profile", "email"],
+      prompt: "select_account",
       session: false,
       state: state
     })(req, res, next);

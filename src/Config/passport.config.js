@@ -20,6 +20,9 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           return done(null, existingUser);
         }
         const email = profile.emails?.[0]?.value;
+        if (!email) {
+          return done(new Error("No email returned from Google account"), null);
+        }
         const existingEmailUser = await User.findOne({ email });
 
         if (existingEmailUser) {
@@ -34,7 +37,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
         //  NEW USER
         const newUser = await User.create({
-          fullName: profile.displayName,
+          fullName: profile.displayName || profile.name?.givenName || "Google User",
           email,
           provider: "google",
           providerId: profile.id,
